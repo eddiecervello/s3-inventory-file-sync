@@ -1,19 +1,22 @@
 # AWS S3 SKU File Sync
 
-This script automates the process of downloading files associated with a list of SKUs from an AWS S3 bucket to a local directory. It is designed to handle the synchronization of product files, ensuring that a local copy of the required files is always up-to-date.
+> **v2.0.0: Now a modular, concurrent, production-grade sync tool!**
+
+This package automates the process of downloading files associated with a list of SKUs from an AWS S3 bucket to a local directory, with robust concurrency, logging, and testability.
 
 ## Features
 
 - Reads SKUs from an Excel file and searches for corresponding files in an S3 bucket.
-- Downloads found files to a local directory, maintaining the SKU structure.
-- Skips empty folders and logs SKUs with no files found.
-- Provides detailed logs for tracking and verification purposes.
+- Concurrent downloads (configurable workers) for high throughput.
+- Strict typing, pydantic config, and JSON-line logging.
+- CLI entry point: `python s3_sku_sync.py` (zero-downtime upgrade)
+- Ready for CI/CD, test coverage, and observability.
 
 ## Prerequisites
 
 - AWS account with S3 read access.
-- Python 3.6 or higher.
-- `boto3` and `pandas` libraries installed.
+- Python 3.12 or higher.
+- `boto3` >= 1.34, `pandas` >= 2.2, `pydantic` >= 2.0
 
 ## Installation
 
@@ -26,7 +29,9 @@ cd s3-sku-file-sync
 
 Install the required Python packages:
 
-```pip install -r requirements.txt```
+```bash
+pip install -r requirements.txt
+```
 
 ## Configuration
 
@@ -39,14 +44,32 @@ export AWS_SESSION_TOKEN='your_session_token'  # if applicable
 ```
 
 ## Usage
-1. Place your 'SKU-list.xlsx' file in the root directory of the script.
-2. Run the script:
-   
-```python s3_sku_sync.py```
 
-3. Check the s3_download.log and not_found_skus.txt files for the results.
+1. Place your Excel file (e.g., `SKU-list.xlsx`) in the repo root.
+2. Run the sync:
 
-## Logs
+```bash
+python s3_sku_sync.py --bucket <bucket> --excel SKU-list.xlsx --local ./downloads
+```
 
-- `s3_download.log`: Contains detailed information about the download process.
-- `not_found_skus.txt`: Lists SKUs that were not found in the S3 bucket.
+Optional flags: `--prefix <s3-prefix>`, `--max-workers 16`, `--log-level DEBUG`
+
+## Architecture
+
+![Architecture Diagram](docs/architecture.png)
+
+- `s3_sku_sync/` — modular package (config, logging, S3, Excel utils)
+- `s3_sku_sync.py` — CLI entry point
+
+## Logs & Observability
+
+- JSON-line logs to stdout (INFO milestones, DEBUG for steps)
+- Extendable for Grafana dashboards and CI/CD metrics
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
+
+---
+
+For full docs, see the [mkdocs site](docs/).

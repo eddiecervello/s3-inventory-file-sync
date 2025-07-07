@@ -1,0 +1,10 @@
+@startuml
+!theme plain
+actor User
+User -> CLI: Run s3_sku_sync.py
+CLI -> Config: Load config
+CLI -> ExcelUtils: Read SKUs
+CLI -> S3Sync: Concurrent download
+S3Sync -> S3: Download files
+S3Sync -> Logging: Log events
+@enduml
