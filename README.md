@@ -11,6 +11,12 @@ This package automates the process of downloading files associated with a list o
 - Strict typing, pydantic config, and JSON-line logging.
 - CLI entry point: `python s3_sku_sync.py` (zero-downtime upgrade)
 - Ready for CI/CD, test coverage, and observability.
+- **NEW**: Configurable file extensions (not just PDFs)
+- **NEW**: Dry-run mode for safe testing
+- **NEW**: Automatic directory creation
+- **NEW**: Skip existing files to avoid re-downloads
+- **NEW**: Progress tracking for large batches
+- **NEW**: Better error handling with specific error codes
 
 ## Prerequisites
 
@@ -52,7 +58,13 @@ export AWS_SESSION_TOKEN='your_session_token'  # if applicable
 python s3_sku_sync.py --bucket <bucket> --excel SKU-list.xlsx --local ./downloads
 ```
 
-Optional flags: `--prefix <s3-prefix>`, `--max-workers 16`, `--log-level DEBUG`
+Optional flags:
+- `--prefix <s3-prefix>` - S3 prefix for SKU files
+- `--max-workers 16` - Number of concurrent downloads (default: 8)
+- `--log-level DEBUG` - Logging level (default: INFO)
+- `--file-extensions .pdf,.txt` - Comma-separated file extensions to try (default: .pdf)
+- `--dry-run` - Show what would be downloaded without actually downloading
+- `--config <path>` - Path to config file (optional, for future use)
 
 ## Architecture
 
@@ -65,11 +77,29 @@ Optional flags: `--prefix <s3-prefix>`, `--max-workers 16`, `--log-level DEBUG`
 
 - JSON-line logs to stdout (INFO milestones, DEBUG for steps)
 - Extendable for Grafana dashboards and CI/CD metrics
+- Progress tracking logged every 10 items
+- Detailed error codes for troubleshooting
 
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 ---
+
+## Testing
+
+Run the test suite:
+
+```bash
+pip install pytest pytest-cov
+pytest tests/ -v --cov=s3_sku_sync --cov-report=term-missing
+```
+
+## Troubleshooting
+
+- **No SKUs found**: Check that your Excel file has a column named 'SKU' (case-sensitive)
+- **All downloads fail**: Verify AWS credentials and bucket permissions
+- **404 errors**: Check the S3 prefix and file extensions match your bucket structure
+- **Slow downloads**: Increase `--max-workers` based on your network and CPU capacity
 
 For full docs, see the [mkdocs site](docs/).

@@ -1,0 +1,1 @@
+# Test package for s3_sku_sync
